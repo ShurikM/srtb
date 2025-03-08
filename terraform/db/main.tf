@@ -1,5 +1,18 @@
 # main.tf
 
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+    null = {
+      source  = "hashicorp/null"
+      version = "~> 3.2"
+    }
+  }
+}
+
 provider "aws" {
   region = "us-east-1"  # Change to your preferred region
 }
@@ -120,6 +133,9 @@ resource "aws_rds_cluster" "aurora_cluster" {
     max_capacity = 1.0
   }
   
+  # Enable Data API for AWS Query Editor access
+  enable_http_endpoint = true
+  
   tags = {
     Name = "SRTB Aurora Cluster"
   }
@@ -140,7 +156,25 @@ resource "aws_rds_cluster_instance" "aurora_instance" {
   }
 }
 
-# Setup has been moved to a separate manual step
+# Null resource to execute the SQL script
+resource "null_resource" "db_setup" {
+  depends_on = [
+    aws_rds_cluster_instance.aurora_instance
+  ]
+
+  # Wait for the database to be fully available
+  provisioner "local-exec" {
+    command = "sleep 60"  # Give Aurora time to fully initialize
+    interpreter = ["bash", "-c"]
+  }
+
+  # Execute the SQL script using psql - Git Bash friendly format
+  provisioner "local-exec" {
+    command = "export PGPASSWORD='${var.aurora_db_password}' && psql -h ${aws_rds_cluster.aurora_cluster.endpoint} -p ${aws_rds_cluster.aurora_cluster.port} -U ${aws_rds_cluster.aurora_cluster.master_username} -d ${aws_rds_cluster.aurora_cluster.database_name} -f ${path.module}/setup.sql"
+    interpreter = ["bash", "-c"]
+  }
+}
+
 # Define variables
 variable "aurora_db_password" {
   description = "Password for the Aurora PostgreSQL master user"

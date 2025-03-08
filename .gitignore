@@ -176,3 +176,6 @@ terraform*
 terraform/db/terraform*
 terraform/db/.terraform*
 terraform/db/.terraform/
+
+# vscode
+.
