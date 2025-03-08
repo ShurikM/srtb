@@ -1,9 +1,18 @@
 # Run Terraform
 
+## Precondition
+
+1. You are logged into AWS CLI with your account.
+2. You have `psql` installed.
+
+## Terraform to Create Aurora DB
+
 This Terraform configuration will create:
 
 1. An Aurora DB cluster with a `campaigns` table.
 2. Insert a single test record with `active` set to `false` in the `campaigns` table.
+
+To apply the Terraform configuration, run the following command:
 
 ```bash
 cd ~/dev/projects/srtb && \
@@ -13,6 +22,6 @@ cd terraform/db && \
 terraform apply
 ```
 
-# Connect to AuroraDB
+## Connect to AuroraDB
 
 See connection details in `.vscode/settings.json`.
