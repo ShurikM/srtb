@@ -44,4 +44,20 @@ resource "aws_instance" "openrtb_server" {
   }
 
   user_data = file("${path.module}/user_data.sh")
+  
+  provisioner "file" {
+    source      = "${path.module}/github_deploy"
+    destination = "/tmp/github_deploy"
+  }
+
+  # Optional: Wait for SSH to be ready before next steps
+  provisioner "remote-exec" {
+    inline = ["echo EC2 is ready."]
+    connection {
+      type        = "ssh"
+      user        = "ec2-user"
+      private_key = file("${path.module}/github_deploy")
+      host        = self.public_ip
+    }
+  }
 }
