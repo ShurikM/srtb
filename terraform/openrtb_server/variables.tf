@@ -15,6 +15,6 @@ variable "my_ip" {
 }
 
 variable "ami_id" {
-  description = "Amazon Linux 2023 AMI"
-  default     = "ami-0c101f26f147fa7fd" # us-east-1
+  description = "Amazon Linux 2023 AMI for eu-central-1"
+  default     = "ami-0b74f796d330ab49c"
 }

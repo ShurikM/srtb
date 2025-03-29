@@ -42,4 +42,6 @@ resource "aws_instance" "openrtb_server" {
   tags = {
     Name = "openrtb-server"
   }
+
+  user_data = file("${path.module}/user_data.sh")
 }
