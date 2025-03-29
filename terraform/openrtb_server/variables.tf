@@ -7,7 +7,7 @@ variable "key_name" {
 }
 
 variable "public_key_path" {
-  default = "/Users/shurikm/.ssh/id_rsa.pub"
+  default = "./github_deploy.pub"
 }
 
 variable "my_ip" {
