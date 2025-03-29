@@ -3,7 +3,7 @@ name = "openrtb-server"
 version = "0.1.0"
 description = ""
 authors = [
-    {name = "shurikm",email = "shurik.mermelshtein@amdocs.com"}
+    {name = "shurikm",email = "vsvisotski@gmail.com"}
 ]
 readme = "README.md"
 requires-python = ">=3.9"
