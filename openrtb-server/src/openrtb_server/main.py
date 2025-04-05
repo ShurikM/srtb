@@ -1,35 +1,18 @@
-from fastapi import FastAPI, Request
-from pydantic import BaseModel
-from typing import List, Optional
+# openrtb_server/main.py
+from fastapi import FastAPI
+from openrtb_server.endpoints import bid, system
+import logging
 
-app = FastAPI()
+logging.basicConfig(
+    filename="bid_requests.log",
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
+app = FastAPI(
+    title="OpenRTB Server",
+    version="0.1.0",
+    description="Supports OpenRTB 2.x and 3.0 request formats."
+)
 
-class Impression(BaseModel):
-    id: str
-
-class BidRequest(BaseModel):
-    id: str
-    imp: List[Impression]
-
-@app.post("/bid")
-async def bid(request: Request, bid_request: BidRequest):
-    print("Received bid request:", bid_request.dict())
-
-    response = {
-        "id": bid_request.id,
-        "seatbid": [
-            {
-                "bid": [
-                    {
-                        "id": "1",
-                        "impid": bid_request.imp[0].id,
-                        "price": 0.5,
-                        "adm": "<!-- Sample Creative -->",
-                        "crid": "creative-123"
-                    }
-                ]
-            }
-        ],
-        "bidid": "bid-123"
-    }
-    return response
+app.include_router(bid.router)
+app.include_router(system.router)
