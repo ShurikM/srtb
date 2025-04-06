@@ -1,7 +1,10 @@
-# openrtb_server/main.py
+# openrtb_server/main.py.py
 from fastapi import FastAPI
 from openrtb_server.endpoints import bid, system
 import logging
+from shared.db.session import SessionLocal
+from shared.models import Campaign
+
 
 logging.basicConfig(
     filename="bid_requests.log",

@@ -13,8 +13,11 @@ terraform {
   }
 }
 
+# provider "aws" {
+#   region = "us-east-1"  # Change to your preferred region
+# }
 provider "aws" {
-  region = "us-east-1"  # Change to your preferred region
+  region = "eu-central-1"  # Frankfurt
 }
 
 # VPC and Security Group configuration for the database
@@ -32,7 +35,7 @@ resource "aws_vpc" "db_vpc" {
 resource "aws_subnet" "db_subnet_1" {
   vpc_id            = aws_vpc.db_vpc.id
   cidr_block        = "10.0.1.0/24"
-  availability_zone = "us-east-1a"  # Change to match your region
+  availability_zone = "eu-central-1a"
   map_public_ip_on_launch = true
   
   tags = {
@@ -43,7 +46,7 @@ resource "aws_subnet" "db_subnet_1" {
 resource "aws_subnet" "db_subnet_2" {
   vpc_id            = aws_vpc.db_vpc.id
   cidr_block        = "10.0.2.0/24"
-  availability_zone = "us-east-1b"  # Change to match your region
+  availability_zone = "eu-central-1b"
   map_public_ip_on_launch = true
   
   tags = {
