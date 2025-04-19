@@ -57,6 +57,8 @@ resource "aws_instance" "openrtb_server" {
     }
   }
 
+  iam_instance_profile = aws_iam_instance_profile.rtb_instance_profile.name
+
   # Optional: Wait for SSH to be ready before next steps
   provisioner "remote-exec" {
     inline = ["echo EC2 is ready."]
@@ -68,3 +70,50 @@ resource "aws_instance" "openrtb_server" {
     }
   }
 }
+
+resource "aws_iam_role" "rtb_ec2_role" {
+  name = "rtb-ec2-s3-access"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        },
+        Action = "sts:AssumeRole"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy" "rtb_s3_policy" {
+  name = "S3LogAccess"
+  role = aws_iam_role.rtb_ec2_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "s3:PutObject",
+          "s3:GetObject",
+          "s3:ListBucket"
+        ],
+        Resource = [
+          "arn:aws:s3:::${var.s3_bucket_name}",
+          "arn:aws:s3:::${var.s3_bucket_name}/*"
+        ]
+      }
+    ]
+  })
+}
+
+resource "aws_iam_instance_profile" "rtb_instance_profile" {
+  name = "rtb-instance-profile"
+  role = aws_iam_role.rtb_ec2_role.name
+}
+
+

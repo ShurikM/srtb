@@ -1,3 +1,5 @@
+from datetime import datetime
+from shared.schemas import CampaignRuntime
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from shared import models, schemas
@@ -43,3 +45,13 @@ def delete_campaign(campaign_id: int, db: Session = Depends(get_db)):
     db.delete(campaign)
     db.commit()
     return {"detail": "Campaign deleted successfully"}
+
+@router.get("/active", response_model=list[CampaignRuntime])
+def get_active_campaigns(db: Session = Depends(get_db)):
+    now = datetime.utcnow()
+    campaigns = db.query(models.Campaign).filter(
+        models.Campaign.is_active == True,
+        models.Campaign.start_time <= now,
+        models.Campaign.end_time >= now,
+    ).all()
+    return campaigns
