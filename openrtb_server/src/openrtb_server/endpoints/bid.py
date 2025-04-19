@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Request
 from shared.schemas import CampaignRuntime
-from openrtb_server.utils.campaign_loader import fetch_active_campaigns
 from uuid import uuid4
 from datetime import datetime, timedelta
 from shared.mytime import utc_now
+
 
 import logging
 import json
@@ -76,8 +76,9 @@ def has_exceeded_caps(campaign: CampaignRuntime) -> bool:
 #
 #     return False
 
-def generate_tracking_pixel(campaign_id: int) -> str:
-    return f'<img src="{RTB_HOST}/track/impression/{campaign_id}" style="display:none;" />'
+def generate_tracking_pixel(request: Request, campaign_id: int) -> str:
+    base_url = str(request.base_url).rstrip("/")  # e.g. http://localhost:8000 or http://ec2-XX-XX.compute.amazonaws.com
+    return f'<img src="{base_url}/track/impression/{campaign_id}" style="display:none;" />'
 
 @router.post("/bid")
 async def handle_bid(request: Request):
@@ -86,14 +87,15 @@ async def handle_bid(request: Request):
     imp = bid_request.get("imp", [{}])[0]
     imp_id = imp.get("id", "1")
 
-    campaigns = fetch_active_campaigns()  # now a dict
+    campaigns = request.app.state.active_campaigns
+
     for campaign in campaigns.values():
         if not campaign.is_active or has_exceeded_caps(campaign):
             continue
         if match_campaign(campaign, bid_request):
             bid_id = str(uuid4())
 
-            tracking_adm = campaign.adm + generate_tracking_pixel(campaign.id)
+            tracking_adm = campaign.adm + generate_tracking_pixel(request, campaign.id)
 
             bid = {
                 "id": bid_id,
@@ -139,7 +141,7 @@ async def handle_bid_openrtb3(request: Request):
         "device": context.get("device", {}),
     }
 
-    campaigns = fetch_active_campaigns()  # dict
+    campaigns = request.app.state.active_campaigns
     for campaign in campaigns.values():
         if not campaign.is_active or has_exceeded_caps(campaign):
             continue

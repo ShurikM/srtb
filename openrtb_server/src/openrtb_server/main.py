@@ -1,32 +1,43 @@
 # openrtb_server/main.py
 from fastapi import FastAPI
-from openrtb_server.endpoints import bid, system
+from openrtb_server.endpoints import system, bid, track
 import logging
-from openrtb_server.utils.campaign_loader import fetch_active_campaigns
+from openrtb_server.utils.campaigns_cache import load_active_campaigns
 from openrtb_server.utils.log_rotation import rotate_logs
 from contextlib import asynccontextmanager
 import threading
 import time
 
-active_campaigns = {}
+from shared.config import IS_FAKE_DB
+
+
+
+import os
+
+LOG_DIR = "logs"
+os.makedirs(LOG_DIR, exist_ok=True)
 
 logging.basicConfig(
-    filename="bid_requests.log",
     level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s"
+    format="%(asctime)s | %(levelname)s | %(message)s",
+    handlers=[
+        logging.FileHandler(os.path.join(LOG_DIR, "rtb_tracking.log")),
+        logging.StreamHandler()  # to see logs in terminal
+    ]
 )
 
 def campaign_refresh_loop():
     global active_campaigns
     while True:
-        active_campaigns = fetch_active_campaigns()
+        active_campaigns = load_active_campaigns(is_fake=IS_FAKE_DB)
         time.sleep(60)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup logic
-    thread = threading.Thread(target=campaign_refresh_loop, daemon=True)
-    thread.start()
+    # thread = threading.Thread(target=campaign_refresh_loop, daemon=True)
+    # thread.start()
+    app.state.active_campaigns = load_active_campaigns(is_fake=True)
 
     yield  # App runs here
 
@@ -42,3 +53,6 @@ app = FastAPI(
 
 app.include_router(bid.router)
 app.include_router(system.router)
+
+app.include_router(track.router)
+
