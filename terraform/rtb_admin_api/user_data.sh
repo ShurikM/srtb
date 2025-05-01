@@ -54,7 +54,7 @@ After=network.target
 User=ubuntu
 WorkingDirectory=/home/ubuntu/srtb/rtb_admin_api
 EnvironmentFile=/home/ubuntu/srtb/.env
-ExecStart=/home/ubuntu/.local/bin/poetry run env PYTHONPATH=/home/ubuntu/srtb uvicorn app.main:app --host 0.0.0.0 --port 8000
+ExecStart=/home/ubuntu/.local/bin/poetry run env PYTHONPATH=/home/ubuntu/srtb uvicorn app.main:app --host 0.0.0.0 --port 8080
 Restart=always
 RestartSec=3
 
