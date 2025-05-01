@@ -51,7 +51,7 @@ resource "aws_instance" "rtb_admin_api" {
 
     connection {
       type        = "ssh"
-      user        = "ec2-user"
+      user        = "ubuntu"
       private_key = file("${path.module}/github_deploy")
       host        = self.public_ip
     }
@@ -64,7 +64,7 @@ resource "aws_instance" "rtb_admin_api" {
     inline = ["echo EC2 is ready."]
     connection {
       type        = "ssh"
-      user        = "ec2-user"
+      user        = "ubuntu"
       private_key = file("${path.module}/github_deploy")
       host        = self.public_ip
     }

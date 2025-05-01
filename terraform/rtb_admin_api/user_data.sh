@@ -2,37 +2,46 @@
 exec > /var/log/user_data.log 2>&1
 set -xe
 
-# Update and install system packages
-yum update -y
-yum install -y git python3
+# Ensure script has correct permissions and line endings
+chmod +x /var/lib/cloud/instance/scripts/* || true
 
-# Install Poetry
-su - ec2-user -c "
-  curl -sSL https://install.python-poetry.org | python3 -
+# Install Python 3.11 and Poetry on Ubuntu
+apt update -y
+apt install -y python3.11 python3.11-venv python3.11-dev git curl build-essential dos2unix
+
+# Make Python 3.11 the default
+update-alternatives --install /usr/bin/python python /usr/bin/python3.11 1
+
+# Install Poetry for ubuntu user
+su - ubuntu -c "curl -sSL https://install.python-poetry.org | python3.11"
+
+
+# Setup PATH for Poetry
+su - ubuntu -c "
   echo 'export PATH=\$HOME/.local/bin:\$PATH' >> ~/.bashrc
   echo 'export PATH=\$HOME/.local/bin:\$PATH' >> ~/.profile
 "
 
-# Setup SSH for GitHub access
-mkdir -p /home/ec2-user/.ssh
-cp /tmp/github_deploy /home/ec2-user/.ssh/id_ed25519
-chmod 600 /home/ec2-user/.ssh/id_ed25519
-chown ec2-user:ec2-user /home/ec2-user/.ssh/id_ed25519
+# Setup SSH key
+mkdir -p /home/ubuntu/.ssh
+cp /tmp/github_deploy /home/ubuntu/.ssh/id_ed25519
+chmod 600 /home/ubuntu/.ssh/id_ed25519
+chown ubuntu:ubuntu /home/ubuntu/.ssh/id_ed25519
 
-cat <<EOF > /home/ec2-user/.ssh/config
+cat <<EOF > /home/ubuntu/.ssh/config
 Host github.com
     StrictHostKeyChecking no
     IdentityFile ~/.ssh/id_ed25519
 EOF
-chown ec2-user:ec2-user /home/ec2-user/.ssh/config
+chown ubuntu:ubuntu /home/ubuntu/.ssh/config
 
-# Clone repository
-su - ec2-user -c "
+# Clone and install the app
+su - ubuntu -c "
   export PATH=\$HOME/.local/bin:\$PATH
   cd ~
   git clone git@github.com:ShurikM/srtb.git
   cd srtb/rtb_admin_api
-  poetry install
+  ~/.local/bin/poetry install --no-root
 "
 
 # Create systemd service
@@ -42,10 +51,10 @@ Description=RTB Admin API Service
 After=network.target
 
 [Service]
-User=ec2-user
-WorkingDirectory=/home/ec2-user/srtb/rtb_admin_api
-EnvironmentFile=/home/ec2-user/srtb/rtb_admin_api/.env
-ExecStart=/home/ec2-user/.local/bin/poetry run uvicorn app.main:app --host 0.0.0.0 --port 8000
+User=ubuntu
+WorkingDirectory=/home/ubuntu/srtb/rtb_admin_api
+EnvironmentFile=/home/ubuntu/srtb/.env
+ExecStart=/home/ubuntu/.local/bin/poetry run uvicorn app.main:app --host 0.0.0.0 --port 8000
 Restart=always
 RestartSec=3
 
@@ -53,7 +62,7 @@ RestartSec=3
 WantedBy=multi-user.target
 EOF
 
-# Set permissions and reload systemd
+# Enable and start the service
 chmod 644 /etc/systemd/system/rtb-admin-api.service
 systemctl daemon-reload
 systemctl enable rtb-admin-api.service
