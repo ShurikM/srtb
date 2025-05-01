@@ -15,7 +15,7 @@ resource "aws_security_group" "openrtb_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = [var.my_ip] # Restrict SSH to your IP
+    cidr_blocks = [var.my_ip]
   }
 
   ingress {
@@ -34,10 +34,10 @@ resource "aws_security_group" "openrtb_sg" {
 }
 
 resource "aws_instance" "openrtb_server" {
-  ami                         = var.ami_id
-  instance_type               = "t2.micro"
-  key_name                    = aws_key_pair.deployer.key_name
-  vpc_security_group_ids      = [aws_security_group.openrtb_sg.id]
+  ami                    = var.ami_id
+  instance_type          = "t2.micro"
+  key_name               = aws_key_pair.deployer.key_name
+  vpc_security_group_ids = [aws_security_group.openrtb_sg.id]
 
   tags = {
     Name = "openrtb-server"
@@ -51,7 +51,7 @@ resource "aws_instance" "openrtb_server" {
 
     connection {
       type        = "ssh"
-      user        = "ec2-user"
+      user        = "ubuntu"
       private_key = file("${path.module}/github_deploy")
       host        = self.public_ip
     }
@@ -59,12 +59,12 @@ resource "aws_instance" "openrtb_server" {
 
   iam_instance_profile = aws_iam_instance_profile.rtb_instance_profile.name
 
-  # Optional: Wait for SSH to be ready before next steps
   provisioner "remote-exec" {
     inline = ["echo EC2 is ready."]
+
     connection {
       type        = "ssh"
-      user        = "ec2-user"
+      user        = "ubuntu"
       private_key = file("${path.module}/github_deploy")
       host        = self.public_ip
     }
@@ -115,5 +115,3 @@ resource "aws_iam_instance_profile" "rtb_instance_profile" {
   name = "rtb-instance-profile"
   role = aws_iam_role.rtb_ec2_role.name
 }
-
-
