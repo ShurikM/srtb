@@ -51,12 +51,12 @@ After=network.target
 
 [Service]
 User=ubuntu
-WorkingDirectory=/home/ubuntu/srtb/openrtb_server
+WorkingDirectory=/home/ubuntu/srtb/openrtb_server/src
 EnvironmentFile=/home/ubuntu/srtb/.env
-ExecStart=/home/ubuntu/.local/bin/poetry run env PYTHONPATH=/home/ubuntu/srtb uvicorn app.main:app --host 0.0.0.0 --port 8080
-
+ExecStart=/home/ubuntu/.local/bin/poetry run env PYTHONPATH=/home/ubuntu/srtb uvicorn openrtb_server.main:app --host 0.0.0.0 --port 8080
 Restart=always
 RestartSec=3
+
 
 [Install]
 WantedBy=multi-user.target
