@@ -39,7 +39,7 @@ su - ubuntu -c "
   export PATH=\$HOME/.local/bin:\$PATH
   cd ~
   git clone git@github.com:ShurikM/srtb.git
-  cd srtb/openrtb-server
+  cd srtb/openrtb_server
   ~/.local/bin/poetry install --no-root
 "
 
