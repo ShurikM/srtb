@@ -11,7 +11,7 @@ variable "public_key_path" {
 }
 
 variable "my_ip" {
-  default = "147.235.206.11/32"
+  default = "84.110.208.178/32"
 }
 
 variable "ami_id" {

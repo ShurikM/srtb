@@ -5,7 +5,6 @@ import logging
 from openrtb_server.utils.campaigns_cache import load_active_campaigns
 from openrtb_server.utils.log_rotation import rotate_logs
 from contextlib import asynccontextmanager
-import threading
 import time
 
 from shared.config import IS_FAKE_DB

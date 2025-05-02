@@ -46,7 +46,8 @@ su - ubuntu -c "
 
   cd srtb/web_ui
   npm install
-  npm run build
+  npm run build 2>&1 | tee ~/web_ui_build.log
+
 
   cd ../rtb_admin_api
   ~/.local/bin/poetry install --no-root
