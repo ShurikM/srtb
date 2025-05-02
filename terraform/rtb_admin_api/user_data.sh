@@ -22,7 +22,7 @@ su - ubuntu -c "
 "
 
 # Install Node.js for React build
-curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
 apt-get install -y nodejs
 
 # Set up SSH access for private repo
@@ -38,31 +38,34 @@ Host github.com
 EOF
 chown ubuntu:ubuntu /home/ubuntu/.ssh/config
 
-# Clone repo, build React UI, and install Python backend
+# Clone repo, write .env, build React UI, install Python backend
 su - ubuntu -c "
   export PATH=\$HOME/.local/bin:\$PATH
   cd ~
   git clone git@github.com:ShurikM/srtb.git
 
-  # ← WRITE ENV so FastAPI can load it
-  cat <<EOF > srtb/.env
-  DB_PASSWORD=hdj47@Jd
-  DATABASE_URL=postgresql+psycopg2://srtb_admin:hdj47@Jd@srtb-postgres-db.cbemw6ioywh2.eu-central-1.rds.amazonaws.com:5432/srtb
-  S3_BUCKET=srtb-log-bucket
-  S3_REGION=eu-central-1
-  EOF
+  # Write environment file for FastAPI
+  cat <<EOV > ~/srtb/.env
+DB_PASSWORD=hdj47@Jd
+DATABASE_URL=postgresql+psycopg2://srtb_admin:hdj47@Jd@srtb-postgres-db.cbemw6ioywh2.eu-central-1.rds.amazonaws.com:5432/srtb
+AWS_ACCESS_KEY_ID=your-access-key
+AWS_SECRET_ACCESS_KEY=your-secret-key
+S3_BUCKET=srtb-log-bucket
+S3_REGION=eu-central-1
+IS_FAKE_DB=True
+EOV
 
-
-  cd srtb/web_ui
+  # Build React frontend
+  cd ~/srtb/web_ui
   npm install
   npm run build 2>&1 | tee ~/web_ui_build.log
 
-
-  cd ../rtb_admin_api
-  ~/.local/bin/poetry install --no-root
+  # Install Python dependencies
+  cd ~/srtb/rtb_admin_api
+  poetry install --no-root
 "
 
-# Create and register systemd service
+# Create and register systemd service unit
 cat <<EOF > /etc/systemd/system/rtb-admin-api.service
 [Unit]
 Description=RTB Admin API Service
@@ -73,8 +76,8 @@ User=ubuntu
 WorkingDirectory=/home/ubuntu/srtb/rtb_admin_api
 EnvironmentFile=/home/ubuntu/srtb/.env
 Environment=PYTHONPATH=/home/ubuntu/srtb
-ExecStart=/home/ubuntu/.local/bin/poetry run uvicorn app.main:app --host 0.0.0.0 --port 8080
-
+# invoke Uvicorn via the venv's Python to guarantee it's on PATH
+ExecStart=/home/ubuntu/.local/bin/poetry run python -m uvicorn app.main:app --host 0.0.0.0 --port 8080
 Restart=always
 RestartSec=3
 
@@ -82,7 +85,7 @@ RestartSec=3
 WantedBy=multi-user.target
 EOF
 
-# Start the FastAPI service
+# Enable & start
 chmod 644 /etc/systemd/system/rtb-admin-api.service
 systemctl daemon-reload
 systemctl enable rtb-admin-api.service

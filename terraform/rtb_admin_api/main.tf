@@ -15,7 +15,7 @@ resource "aws_security_group" "openrtb_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = [var.my_ip] # Restrict SSH to your IP
+    cidr_blocks = [local.ssh_cidr]
   }
 
   ingress {

@@ -10,8 +10,12 @@ variable "public_key_path" {
   default = "./github_deploy.pub"
 }
 
-variable "my_ip" {
-  default = "147.235.206.11/32"
+data "http" "my_ip" {
+  url = "https://checkip.amazonaws.com"   # returns your IP + newline
+}
+
+locals {
+  ssh_cidr = "${chomp(data.http.my_ip.response_body)}/32"
 }
 
 variable "ami_id" {
