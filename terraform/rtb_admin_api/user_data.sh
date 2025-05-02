@@ -44,6 +44,12 @@ su - ubuntu -c "
   cd ~
   git clone git@github.com:ShurikM/srtb.git
 
+  # ← WRITE ENV so FastAPI can load it
+  cat <<EOF > srtb/.env
+  DB_PASSWORD=hdj47#Jd
+  EOF
+
+
   cd srtb/web_ui
   npm install
   npm run build 2>&1 | tee ~/web_ui_build.log
