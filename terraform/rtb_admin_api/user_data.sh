@@ -46,7 +46,10 @@ su - ubuntu -c "
 
   # ← WRITE ENV so FastAPI can load it
   cat <<EOF > srtb/.env
-  DB_PASSWORD=hdj47#Jd
+  DB_PASSWORD=hdj47@Jd
+  DATABASE_URL=postgresql+psycopg2://srtb_admin:hdj47@Jd@srtb-postgres-db.cbemw6ioywh2.eu-central-1.rds.amazonaws.com:5432/srtb
+  S3_BUCKET=srtb-log-bucket
+  S3_REGION=eu-central-1
   EOF
 
 
@@ -69,7 +72,9 @@ After=network.target
 User=ubuntu
 WorkingDirectory=/home/ubuntu/srtb/rtb_admin_api
 EnvironmentFile=/home/ubuntu/srtb/.env
-ExecStart=/home/ubuntu/.local/bin/poetry run env PYTHONPATH=/home/ubuntu/srtb uvicorn app.main:app --host 0.0.0.0 --port 8080
+Environment=PYTHONPATH=/home/ubuntu/srtb
+ExecStart=/home/ubuntu/.local/bin/poetry run uvicorn app.main:app --host 0.0.0.0 --port 8080
+
 Restart=always
 RestartSec=3
 
