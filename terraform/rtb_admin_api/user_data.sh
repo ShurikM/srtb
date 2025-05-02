@@ -2,27 +2,30 @@
 exec > /var/log/user_data.log 2>&1
 set -xe
 
-# Ensure script has correct permissions and line endings
+# Fix script line endings and permissions
 chmod +x /var/lib/cloud/instance/scripts/* || true
 
-# Install Python 3.11 and Poetry on Ubuntu
+# Update system and install essential packages
 apt update -y
 apt install -y python3.11 python3.11-venv python3.11-dev git curl build-essential dos2unix
 
-# Make Python 3.11 the default
+# Set Python 3.11 as default
 update-alternatives --install /usr/bin/python python /usr/bin/python3.11 1
 
 # Install Poetry for ubuntu user
 su - ubuntu -c "curl -sSL https://install.python-poetry.org | python3.11"
 
-
-# Setup PATH for Poetry
+# Configure Poetry PATH for ubuntu user
 su - ubuntu -c "
   echo 'export PATH=\$HOME/.local/bin:\$PATH' >> ~/.bashrc
   echo 'export PATH=\$HOME/.local/bin:\$PATH' >> ~/.profile
 "
 
-# Setup SSH key
+# Install Node.js for React build
+curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+apt-get install -y nodejs
+
+# Set up SSH access for private repo
 mkdir -p /home/ubuntu/.ssh
 cp /tmp/github_deploy /home/ubuntu/.ssh/id_ed25519
 chmod 600 /home/ubuntu/.ssh/id_ed25519
@@ -35,16 +38,21 @@ Host github.com
 EOF
 chown ubuntu:ubuntu /home/ubuntu/.ssh/config
 
-# Clone and install the app
+# Clone repo, build React UI, and install Python backend
 su - ubuntu -c "
   export PATH=\$HOME/.local/bin:\$PATH
   cd ~
   git clone git@github.com:ShurikM/srtb.git
-  cd srtb/rtb_admin_api
+
+  cd srtb/web_ui
+  npm install
+  npm run build
+
+  cd ../rtb_admin_api
   ~/.local/bin/poetry install --no-root
 "
 
-# Create systemd service
+# Create and register systemd service
 cat <<EOF > /etc/systemd/system/rtb-admin-api.service
 [Unit]
 Description=RTB Admin API Service
@@ -62,7 +70,7 @@ RestartSec=3
 WantedBy=multi-user.target
 EOF
 
-# Enable and start the service
+# Start the FastAPI service
 chmod 644 /etc/systemd/system/rtb-admin-api.service
 systemctl daemon-reload
 systemctl enable rtb-admin-api.service
