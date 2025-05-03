@@ -1,13 +1,14 @@
+# rtb_admin_api/app/main.py
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from app.api import campaigns
-import os
-from pathlib import Path
 import logging
 from logging.handlers import RotatingFileHandler
+from pathlib import Path
 
 # Prepare log directory and rotating handler
-LOG_DIR = Path(__file__).resolve().parent.parent / "logs"
+BASE_DIR = Path(__file__).resolve().parent.parent
+LOG_DIR = BASE_DIR / "logs"
 LOG_FILE = LOG_DIR / "rtb_admin.log"
 LOG_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -30,10 +31,8 @@ console_handler.setFormatter(
 logging.basicConfig(level=logging.INFO, handlers=[rotating_handler, console_handler])
 logger = logging.getLogger(__name__)
 
-# Compute path to React output directory (dist)
-BASE_DIR = Path(__file__).resolve().parent.parent
-WEB_UI_BUILD_DIR = BASE_DIR.parent / "web_ui" / "dist"
-
+# Compute path to React build directory (build)
+WEB_UI_BUILD_DIR = BASE_DIR.parent / "web_ui" / "build"
 logger.info(f"Serving React UI from: {WEB_UI_BUILD_DIR}")
 
 # Create FastAPI app
