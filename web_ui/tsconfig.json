@@ -1,17 +1,21 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
-    "module": "ESNext",
+    "target": "esnext",
+    "module": "esnext",
     "lib": ["DOM", "ESNext"],
     "jsx": "react-jsx",
     "strict": true,
     "moduleResolution": "Node",
     "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
-    }
+    },
+    "types": [
+      "vite/client"
+    ]
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist", "build"]
