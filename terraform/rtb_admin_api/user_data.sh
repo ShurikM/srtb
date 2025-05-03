@@ -46,8 +46,8 @@ su - ubuntu -c "
 
   # Write environment file for FastAPI
   cat <<EOV > ~/srtb/.env
-DB_PASSWORD=hdj47@Jd
-DATABASE_URL=postgresql+psycopg2://srtb_admin:hdj47@Jd@srtb-postgres-db.cbemw6ioywh2.eu-central-1.rds.amazonaws.com:5432/srtb
+DB_PASSWORD=hdj47%Jd
+DATABASE_URL=postgresql+psycopg2://srtb_admin:hdj47%Jd@srtb-postgres-db.cbemw6ioywh2.eu-central-1.rds.amazonaws.com:5432/srtb
 AWS_ACCESS_KEY_ID=your-access-key
 AWS_SECRET_ACCESS_KEY=your-secret-key
 S3_BUCKET=srtb-log-bucket
