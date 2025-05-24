@@ -34,6 +34,8 @@ class CampaignRuntime(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: str
+    name: str
+    domain: str
     crid: str
     adm: str
     price: float
