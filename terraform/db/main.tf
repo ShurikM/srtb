@@ -88,7 +88,7 @@ resource "aws_db_instance" "postgresql" {
   max_allocated_storage    = 100
   engine                   = "postgres"
   engine_version           = "15.10"
-  instance_class           = "db.t4g.micro"  # Free Tier
+  instance_class           = "db.t3.micro"  # Free Tier
   db_name                  = "srtb"
   username                 = "srtb_admin"
   password                 = var.db_password

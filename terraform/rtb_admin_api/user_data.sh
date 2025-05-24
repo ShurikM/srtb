@@ -38,7 +38,7 @@ Host github.com
 EOF
 chown ubuntu:ubuntu /home/ubuntu/.ssh/config
 
-# Clone repo, write .env, build React UI, install Python backend
+# Clone repo, write .env.dev, build React UI, install Python backend
 su - ubuntu -c "
   export PATH=\$HOME/.local/bin:\$PATH
   cd ~

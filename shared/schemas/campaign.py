@@ -3,6 +3,7 @@ from typing import Optional, Dict, Any, List
 from datetime import datetime
 
 class CampaignBase(BaseModel):
+    id: str
     name: str
     domain: str
     price: float
@@ -27,15 +28,12 @@ class CampaignCreate(CampaignBase):
     pass
 
 class CampaignRead(CampaignBase):
-    id: int
-
-    class Config:
-        orm_mode = True
+    pass
 
 class CampaignRuntime(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    id: int
+    id: str
     crid: str
     adm: str
     price: float

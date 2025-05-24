@@ -1,26 +1,20 @@
-// src/components/LoginPage.tsx
 import { useState } from "react";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
 import { Input } from "./ui/input";
+import { login } from "../api";
 
-export default function LoginPage() {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+export default function LoginPage({ onLogin }: { onLogin: () => void }) {
+  const [username, setUsername] = useState("admin");
+  const [password, setPassword] = useState("password");
   const [error, setError] = useState("");
 
   const handleLogin = async () => {
     setError("");
     try {
-      const res = await fetch("/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
-      });
-      if (!res.ok) throw new Error("Login failed");
-      const data = await res.json();
-      console.log("Token:", data.token);
-      // store token or redirect
+      const ok = await login(username, password);
+      if (!ok) throw new Error("Login failed");
+      onLogin();
     } catch (e: any) {
       setError(e.message);
     }
